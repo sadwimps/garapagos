@@ -1,4 +1,4 @@
-# ----------------------------------------------------------
+﻿# ----------------------------------------------------------
 # 石取りゲーム クライアント（2016年度下期プロコン用）
 # ----------------------------------------------------------
 # 開発環境：Python3.5.2
@@ -28,8 +28,7 @@ G_FALSE = -1          # エラー判定
 #G_ROW = 5             # 石を並べる行数
 #G_COL = 7             # 石を並べる列数
 G_SENTE = 0           # 先手
-G_G
-OTE = 1            # 後手
+G_GOTE = 1            # 後手
 
 G_MANPC = 0           # 人対PCモード
 G_MANCOM = 1          # 人対通信モード
@@ -38,9 +37,9 @@ G_PCCOM = 2           # PC対通信モード
 # --------------------------------------
 # 定数宣言 開発用※開発終了したら削除(上のコメント化も戻す)
 # --------------------------------------
-G_MAXSTONE = 6       # 石の最大数
-G_ROW = 2            # 石を並べる行数
-G_COL = 3            # 石を並べる列数
+G_MAXSTONE = 35       # 石の最大数
+G_ROW = 5            # 石を並べる行数
+G_COL = 7            # 石を並べる列数
 
 # --------------------------------------
 # モジュールimport
@@ -138,7 +137,7 @@ g_lstLiveStone = []                  # 残存石リストのみを格納する�
 # --------------------------------------
 g_lstLiveStone2 = np.array([[]])   # 残存石の2個のペアを格納するリストを用意
 g_lstLiveStone3 = np.array([[]])   # 残存石の3個のペアを格納するリストを用意
-g_lstLiveStone4 = np.array([[]])   # 残存石の4個のペアを格納するリストを用意
+g_lstLiveStone4 = np.array([[]])   # 残存石の3個のペアを格納するリストを用意
 
 # ☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆
 # ☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆
@@ -191,19 +190,21 @@ def fncThinking():
     # ☆☆石の状態を保存するグローバル変数は自由に設定可とする
     # ☆☆その場合は「石の準備」、fncResetStones()、fncPickupStone()での操作を忘れずに！
     # ☆☆「取る石の番号をカンマ区切で指定した文字列」が戻値
-    i = len(g_lstLiveStone)     # 残存石の数を取得
+    zanN = len(g_lstLiveStone)     # 残存石の数を取得
+
+# --石のペアの生成はここでやります！------------------
+    if zanN > 1:
+        fncGeneratePair2()
+        if zanN > 2:
+            fncGeneratePair3()
+            if zanN > 3:
+                fncGeneratePair4()
 
 # --関数のエラーチェックはここでやります！------------------
 
     if fncCheckEnd() < 0:
         fncPrintLog('「fncCheckEnd」で何か起きてるよ！')
 
-# ----------------------------------------------------------
-
-# --石のペアの生成はここでやります！------------------
-    fncGeneratePair2()
-    fncGeneratePair3()
-    fncGeneratePair4()
 
 # 詰みの部分------------------------------------------------
     # 詰めない場合はスルー
@@ -217,7 +218,7 @@ def fncThinking():
             return 0
 
 # 序盤から中盤----------------------------------------------
-    j = rd.randint(0,i-1)       # 残存石のインデックスをランダムに生成
+    j = rd.randint(0,zanN-1)       # 残存石のインデックスをランダムに生成
 
     # ゲームの初手らへん------------------------------------
 
@@ -231,64 +232,59 @@ def fncThinking():
 # 2個の組み合わせを作成しますよ！
 # ----------------------------------------------------------
 def fncGeneratePair2():
-    l_lstCheckStone = []                         # 残存石をチェックする為のリストを用意
-    g_lstLiveStone2 = [[]]                       # 残存石のペア配列を初期化
+    g_lstLiveStone2 = []                           # 残存石のペア配列を初期化
+    zanN = len(g_lstLiveStone)
+   
+    for i in range(zanN - 1):
+        for j in range(i + 1, zanN):
+            l_lstCheckStone2 = [0,0]                    # 残存石をチェックする為のリストを用意
+            l_lstCheckStone2[0] = g_lstLiveStone[i]
+            l_lstCheckStone2[1] = g_lstLiveStone[j]
+            if fncCheckStones(l_lstCheckStone2) == G_TURE:
+                g_lstLiveStone2.append(l_lstCheckStone2)
 
-    for i in range(len(g_lstLiveStone)):
-        j = j + i
-        for j in range(len(g_lstLiveStone) - i - 1):
-            l_lstCheckStone[0] = g_lstLiveStone[i]
-            l_lstCheckStone[1] = g_lstLiveStone[i + j]
-            if fncCheckStones(l_lstCheckStone) == G_TURE:
-                g_lstLiveStone2.append(l_lstCheckStone)
-
-        fncPrintLog(len(g_lstLiveStone2))
+    fncPrintLog(len(g_lstLiveStone2))
 
 # ----------------------------------------------------------
 # 3個の組み合わせを作成しますよ！
 # ----------------------------------------------------------
 def fncGeneratePair3():
-    l_lstCheckStone = []                         # 残存石をチェックする為のリストを用意
-    g_lstLiveStone3 = [[]]                           # 残存石のペア配列を初期化
+    g_lstLiveStone3 = []                           # 残存石のペア配列を初期化
+    l_lstCheckStone3 = [0,0,0]                    # 残存石をチェックする為のリストを用意
+    zanN = len(g_lstLiveStone)
 
-    for i in range(len(g_lstLiveStone)):
-        j = j + i
-        for j in range(len(g_lstLiveStone) - i - 1):
-            l_lstCheckStone[0] = g_lstLiveStone[i]
-            l_lstCheckStone[1] = [i + j]
-            for k in range(len(g_lstLiveStone) - i - j - 1):
-                l_lstCheckStone[0] = g_lstLiveStone[i]
-                l_lstCheckStone[1] = g_lstLiveStone[i + j]
-                l_lstCheckStone[1] = g_lstLiveStone[i + j + k]
-                if fncCheckStones(l_lstCheckStone) == G_TURE:
-                    g_lstLiveStone3.append(l_lstCheckStone)
-
-        fncPrintLog(len(g_lstLiveStone3))
+    for i in range(zanN-2):
+       fncPrintLog('ok= ') 
+       fncPrintLog(zanN-2) 
+       for j in range(i + 1, zanN-1):
+            for k in range(i + j + 1, zanN):
+                l_lstCheckStone3[0] = g_lstLiveStone[i]
+                l_lstCheckStone3[1] = g_lstLiveStone[j]
+                l_lstCheckStone3[2] = g_lstLiveStone[k]
+                if fncCheckStones(l_lstCheckStone3) == G_TURE:
+                    g_lstLiveStone3.append(l_lstCheckStone3)
+    fncPrintLog(len(g_lstLiveStone))
 
 # ----------------------------------------------------------
 # 4個の組み合わせを作成しますよ！
 # ----------------------------------------------------------
-def fncGeneratePair2():
-    l_lstCheckStone = []                          # 残存石をチェックする為のリストを用意
-    g_lstLiveStone2 = [[]]              # 残存石のペア配列を初期化
+def fncGeneratePair4():
+    g_lstLiveStone4 = []              # 残存石のペア配列を初期化
+    zanN = len(g_lstLiveStone)
 
-    for i in range(len(g_lstLiveStone)):
-        j = j + i
-        for j in range(len(g_lstLiveStone) - i - 1):
-            l_lstCheckStone[0] = g_lstLiveStone[i]
-            l_lstCheckStone[1] = [i + j]
-            for k in range(len(g_lstLiveStone) - i - j - 1):
-                l_lstCheckStone[0] = g_lstLiveStone[i]
-                l_lstCheckStone[1] = g_lstLiveStone[i + j]
-                l_lstCheckStone[1] = g_lstLiveStone[i + j + k]
-                for k in range(len(g_lstLiveStone) - i - j - 1):
-                    l_lstCheckStone[0] = g_lstLiveStone[i]
-                    l_lstCheckStone[1] = g_lstLiveStone[i + j]
-                    l_lstCheckStone[1] = g_lstLiveStone[i + j + k]
-                    if fncCheckStones(l_lstCheckStone) == G_TURE:
-                        g_lstLiveStone3.append(l_lstCheckStone)
+    for i in range(zanN - 3):
+        for j in range(i + 1, zanN - 2):
+            for k in range(i + j + 1, zanN - 1):
+                    for l in range(i + j + k + 1, zanN):
+                        l_lstCheckStone4 = [0,0,0,0]    # 残存石をチェックする為のリストを用意
+                        l_lstCheckStone4[0] = g_lstLiveStone[i]
+                        l_lstCheckStone4[1] = g_lstLiveStone[j]
+                        l_lstCheckStone4[2] = g_lstLiveStone[k]
+                        l_lstCheckStone4[3] = g_lstLiveStone[l]
+                        if fncCheckStones(l_lstCheckStone4) == G_TURE:
+                            g_lstLiveStone4.append(l_lstCheckStone4)
 
-        fncPrintLog(len(g_lstLiveStone4))
+    fncPrintLog(len(g_lstLiveStone4))
 
 # ----------------------------------------------------------
 # ここで詰みの部分を作成しますよ！
@@ -600,6 +596,7 @@ def fncSetConectFrame():
 # ----------------------------------------------------------
 def fncPushSelect() :
     g_ivTeban.set(G_SENTE)                          # 先手に初期化
+    strTeam = g_strTeam.get()                          # チーム名を取得
     strMode = u'人 対 PC'                           # 表示対戦モードを人対PCに設定
     intMode = g_ivMode.get()                        # 対戦モードを取得
     if intMode == G_MANCOM:                         # 人対通信ならば

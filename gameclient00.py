@@ -134,10 +134,6 @@ g_lstLiveStone = []                  # 残存石リストのみを格納する�
 # --------------------------------------
 # 状態保持変数 (追加分)
 # --------------------------------------
-g_lstLiveStone2 = []   # 残存石の2個のペアを格納するリストを用意
-g_lstLiveStone3 = []   # 残存石の3個のペアを格納するリストを用意
-g_lstLiveStone4 = []   # 残存石の3個のペアを格納するリストを用意
-d_lstLiveStone3 = []   # debug用の配列
 
 # ☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆
 # ☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆
@@ -192,12 +188,17 @@ def fncThinking():
     # ☆☆「取る石の番号をカンマ区切で指定した文字列」が戻値
 # --石のペアの生成はここでやります！------------------
     zanNum = len(g_lstLiveStone)     # 残存石の数を取得
+    g_lstLiveStone2=[]
+    g_lstLiveStone3=[]
+    g_lstLiveStone4=[]
+
     if zanNum > 1:
         g_lstLiveStone2 = fncGeneratePair2()
         if zanNum > 2:
-            g_lstLiveStone3 = fncGeneratePair3(g_lstLiveStone2)
-            if zanNum > 3:
-                g_lstLiveStone4 = fncGeneratePair4(g_lstLiveStone2)
+            if len(g_lstLiveStone2) > 0:
+                g_lstLiveStone3 = fncGeneratePair3(g_lstLiveStone2)
+                if zanNum > 3:
+                    g_lstLiveStone4 = fncGeneratePair4(g_lstLiveStone2)
 
 # --関数のエラーチェックはここでやります！------------------
 
@@ -209,7 +210,7 @@ def fncThinking():
     zanNum2 = len(g_lstLiveStone2)     # 残存石のペア2の数を取得
     zanNum3 = len(g_lstLiveStone3)     # 残存石のペア3の数を取得
     zanNum4 = len(g_lstLiveStone4)     # 残存石のペア4の数を取得
-    TakeStoneList = []                 # 実際に取得するのペアのリスト
+    TakeStoneList = [0]                 # 実際に取得するのペアのリスト
     TakeStoneString = ''
 
 # 詰みの部分------------------------------------------------
@@ -224,14 +225,28 @@ def fncThinking():
             return 0
 
 # 序盤から中盤----------------------------------------------
-    j = rd.randint(0,zanNum4-1)       # 残存石のインデックスをランダムに生成
-
     # ゲームの初手らへん------------------------------------
-    TakeStoneList = g_lstLiveStone4[j]
+    if zanNum4 > 0:
+        go4 = rd.randint(0,zanNum4-1)       # 残存石のインデックスをランダムに生成
+        TakeStoneList = g_lstLiveStone4[go4]
+    elif zanNum3 > 0:
+        go3 = rd.randint(0,zanNum3-1)       # 残存石のインデックスをランダムに生成
+        TakeStoneList = g_lstLiveStone3[go3]
+    elif zanNum2 > 0:
+        go2 = rd.randint(0,zanNum2-1)       # 残存石のインデックスをランダムに生成
+        TakeStoneList = g_lstLiveStone2[go2]
+    else:
+        go1 = rd.randint(0,zanNum-1)        # 残存石のインデックスをランダムに生成
+        TakeStoneList[0] = g_lstLiveStone[go1]
+        fncPrintLog(TakeStoneList)
+
+#    for i in range(len(g_lstLiveStone)):
+#        if g_lstLiveStone[i] > '13' and g_lstLiveStone[i] < '21':
+#            TakeStoneList = fncFirst()
+#            break
 
     # 戦況を有利にする部分----------------------------------
 
-    fncPrintLog(TakeStoneList)
 
 # 実際の石の取得--------------------------------------------    
 
@@ -239,8 +254,6 @@ def fncThinking():
         TakeStoneString=TakeStoneString+TakeStoneList[i]
         if i < len(TakeStoneList)-1 :
             TakeStoneString = TakeStoneString + ','
-
-    fncPrintLog(TakeStoneString)
 
     return TakeStoneString    # サンプルは残存石を１つランダムに返す
 
@@ -326,6 +339,55 @@ def fncGeneratePair4(g_lstLiveStone2):
         del g_lstLiveStone4[ChkNum]
 
     return g_lstLiveStone4
+
+
+
+def fncFirst():
+    Stone = []                                                    #14～20の配列があれば格納する配列
+    Stone2 = []                                                   #14～20の中で一番長いペアを探す配列
+    Stonepair2 = []                                               #2つの数字の連続性チェック用配列
+    TakeStones = []                                               #取得メソッドの引数となる配列
+    i = 0                                                         #残存石の添え字
+    j = 0                                                         #Stone配列の添え字
+    while i < 35:                                                 #14～20をStone配列に格納
+        if g_lstLiveStone[i] > '13' and g_lstLiveStone[i] < '21':
+                Stone[j] = g_lstLiveStone[i]
+                j += 1
+        i += 1
+
+    i = 0                                                         #Stone配列の添え字
+    j = 0                                                         #ペアの最終添え字
+    Stone2len = 1                                             #ペアの要素数(最大4ペア(5要素文))
+   
+    if len(Stone) >= 2:                                           #14～20が2つ以上あったら
+        while i < len(Stone) - 1:                                 #Stone配列の添え字分繰り返す
+            Stonepair2[0] = Stone[i]                              #連続性チェックの為、2つの数字をチェック用配列に格納
+            Stonepair2[1] = Stone[i+1]
+
+            if fncCheckStones(Stonepair2):                        #連続性があったら
+                if len(Stone2) < 1:                               #Stone2配列の要素が0の場合は2つの数字を格納
+                    Stone2.extend(Stonepair2)
+                else:                                             #Stibe2配列の要素が1つでもあれば、Stonepair2[1](末尾)だけを追加
+                    Stone2.append(Stonepair2[1])
+            else:                                                 #連続性がなかったら
+                if Stone2len < len(Stone2):                       #1個前までのペアの要素数(最大4ペア(5)要素分)と現在のペアの要素数を比較
+                    j = i - 1                                     #現在のペアの要素数が大きければ、連続性チェックOKだった要素の添え字を取得
+                    Stone2len = len(Stone2)                       #現在のペアの要素数が大きければ、現在のペアの要素を取得
+                    del Stone2[:]                                 #Stone2配列を初期化
+
+            i += 1
+
+        if Stone2len > 4:                                         #4ペア以上連続する場合は
+            TakeStones = Stone[j-Stone2len:j-Stone2len+4]         #開始添え字から+4の添え字までを格納
+            return TakeStones                             #複数の石取得メソッドを起動
+
+        else:
+            TakeStones = Stone[j-Stone2len:j]                     #連続性チェックで最後にOKだった添え字から、最大ペアの要素数を引いた添え字までを格納
+            return TakeStones
+    
+    else:
+        TakeStones.extend(Stone2)                                 #14～20が1つしかない為、Stone2配列の中身をそのまま格納
+        return TakeStones
 
 # ----------------------------------------------------------
 # ここで詰みの部分を作成しますよ！

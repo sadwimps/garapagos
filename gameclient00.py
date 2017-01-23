@@ -210,22 +210,78 @@ def fncThinking():
     zanNum2 = len(g_lstLiveStone2)     # 残存石のペア2の数を取得
     zanNum3 = len(g_lstLiveStone3)     # 残存石のペア3の数を取得
     zanNum4 = len(g_lstLiveStone4)     # 残存石のペア4の数を取得
-    TakeStoneList = [0]                 # 実際に取得するのペアのリスト
-    TakeStoneString = ''
+    TakeStoneList = [0]                # 実際に取得するのペアのリスト
+    CheckStoneList = []                #はじめの方で取得していく石のリスト
 
 # 詰みの部分------------------------------------------------
-    # 詰めない場合はスルー
-    if fncCheckEnd() > 0:
-        #勝ちパターンA
-        if fncCheckEnd() == 1:
-            return 0
+    # 2個のペアのみになったら詰みの動作を開始(L字もなくなっている想定)
+    if zanNum3 == 0 and zanNum4 == 0:
+        # 詰めない場合「fncCheckEnd()」が0を返した場合はスルー
+        if fncCheckEnd() > 0:
+            #2個のペアから1個をとるパターン
+            if fncCheckEnd() == 1:
+                TakeStoneList[0] = g_lstLiveStone2[0][0]
+                if len(TakeStoneList) > 0:
+                    return fncGetStoneStr(TakeStoneList)
 
-        #勝ちパターンB
-        elif fncCheckEnd() == 2:
-            return 0
+            #2個のペアから2個をとるパターン
+            elif fncCheckEnd() == 2:
+                TakeStoneList = g_lstLiveStone2[0]
+                if len(TakeStoneList) > 0:
+                    return fncGetStoneStr(TakeStoneList)
+
+            #1個バラの側からとるパターン
+            elif fncCheckEnd() == 3:
+                for i in range(zanNum - 1):
+                    for j in range(i + 1, zanNum):
+                        chkList = [0,0]
+                        chkList[0] = g_lstLiveStone[i]
+                        chkList[1] = g_lstLiveStone[j]
+                        if fncCheckStones(chkList) == G_TURE:
+                            TakeStoneList = chkList
+                            break
+                    if len(TakeStoneList)>0:
+                        break
+                if len(TakeStoneList) > 0:
+                    return fncGetStoneStr(TakeStoneList)
+            else:
+                fncPrintLog('「fncCheckEnd」で何か起きてるよ！')
+
 
 # 序盤から中盤----------------------------------------------
-    # ゲームの初手らへん------------------------------------
+    # まずは真ん中からズバット------------------------------
+    for i in range(len(g_lstLiveStone)):
+        if g_lstLiveStone[i] > '13' and g_lstLiveStone[i] < '21':
+            CheckStoneList=['14','15','16','17','18','19','20']
+            TakeStoneList = fncFirst(CheckStoneList,g_lstLiveStone4,g_lstLiveStone3,g_lstLiveStone2)
+            if len(TakeStoneList) > 0:
+                return fncGetStoneStr(TakeStoneList)
+
+    # 続いて2列目にある時     ------------------------------
+    for i in range(len(g_lstLiveStone)):
+        if int(g_lstLiveStone[i]) % G_COL == 1:
+            CheckStoneList=['01','08','15','22','29']
+            TakeStoneList = fncFirst(CheckStoneList,g_lstLiveStone4,g_lstLiveStone3,g_lstLiveStone2)
+            if len(TakeStoneList) > 0:
+                return fncGetStoneStr(TakeStoneList)
+
+    # 続いて4列目にある時     ------------------------------
+    for i in range(len(g_lstLiveStone)):
+        if int(g_lstLiveStone[i]) % G_COL == 3:
+            CheckStoneList=['03','10','17','24','31']
+            TakeStoneList = fncFirst(CheckStoneList,g_lstLiveStone4,g_lstLiveStone3,g_lstLiveStone2)
+            if len(TakeStoneList) > 0:
+                return fncGetStoneStr(TakeStoneList)
+
+    # 続いて4列目にある時     ------------------------------
+    for i in range(len(g_lstLiveStone)):
+        if int(g_lstLiveStone[i]) % G_COL == 3:
+            CheckStoneList=['05','12','19','26','33']
+            TakeStoneList = fncFirst(CheckStoneList,g_lstLiveStone4,g_lstLiveStone3,g_lstLiveStone2)
+            if len(TakeStoneList) > 0:
+                return fncGetStoneStr(TakeStoneList)
+
+    # ここからは取り損ねた時用------------------------------------
     if zanNum4 > 0:
         go4 = rd.randint(0,zanNum4-1)       # 残存石のインデックスをランダムに生成
         TakeStoneList = g_lstLiveStone4[go4]
@@ -238,24 +294,21 @@ def fncThinking():
     else:
         go1 = rd.randint(0,zanNum-1)        # 残存石のインデックスをランダムに生成
         TakeStoneList[0] = g_lstLiveStone[go1]
-        fncPrintLog(TakeStoneList)
 
-#    for i in range(len(g_lstLiveStone)):
-#        if g_lstLiveStone[i] > '13' and g_lstLiveStone[i] < '21':
-#            TakeStoneList = fncFirst()
-#            break
+    return fncGetStoneStr(TakeStoneList)
 
-    # 戦況を有利にする部分----------------------------------
+# 戦況を有利にする部分----------------------------------
 
 
 # 実際の石の取得--------------------------------------------    
-
+def fncGetStoneStr(TakeStoneList):
+    TakeStoneString = ''               # 実際に取得するのペアの文字列
     for i in range(len(TakeStoneList)):
         TakeStoneString=TakeStoneString+TakeStoneList[i]
         if i < len(TakeStoneList)-1 :
             TakeStoneString = TakeStoneString + ','
 
-    return TakeStoneString    # サンプルは残存石を１つランダムに返す
+    return TakeStoneString
 
 # ----------------------------------------------------------
 # 2個の組み合わせを作成しますよ！
@@ -341,53 +394,42 @@ def fncGeneratePair4(g_lstLiveStone2):
     return g_lstLiveStone4
 
 
+# ----------------------------------------------------------
+# 指定した範囲から多い順にペアを選択しますよ！
+# ----------------------------------------------------------
 
-def fncFirst():
-    Stone = []                                                    #14～20の配列があれば格納する配列
-    Stone2 = []                                                   #14～20の中で一番長いペアを探す配列
-    Stonepair2 = []                                               #2つの数字の連続性チェック用配列
-    TakeStones = []                                               #取得メソッドの引数となる配列
-    i = 0                                                         #残存石の添え字
-    j = 0                                                         #Stone配列の添え字
-    while i < 35:                                                 #14～20をStone配列に格納
-        if g_lstLiveStone[i] > '13' and g_lstLiveStone[i] < '21':
-                Stone[j] = g_lstLiveStone[i]
-                j += 1
-        i += 1
-
-    i = 0                                                         #Stone配列の添え字
-    j = 0                                                         #ペアの最終添え字
-    Stone2len = 1                                             #ペアの要素数(最大4ペア(5要素文))
-   
-    if len(Stone) >= 2:                                           #14～20が2つ以上あったら
-        while i < len(Stone) - 1:                                 #Stone配列の添え字分繰り返す
-            Stonepair2[0] = Stone[i]                              #連続性チェックの為、2つの数字をチェック用配列に格納
-            Stonepair2[1] = Stone[i+1]
-
-            if fncCheckStones(Stonepair2):                        #連続性があったら
-                if len(Stone2) < 1:                               #Stone2配列の要素が0の場合は2つの数字を格納
-                    Stone2.extend(Stonepair2)
-                else:                                             #Stibe2配列の要素が1つでもあれば、Stonepair2[1](末尾)だけを追加
-                    Stone2.append(Stonepair2[1])
-            else:                                                 #連続性がなかったら
-                if Stone2len < len(Stone2):                       #1個前までのペアの要素数(最大4ペア(5)要素分)と現在のペアの要素数を比較
-                    j = i - 1                                     #現在のペアの要素数が大きければ、連続性チェックOKだった要素の添え字を取得
-                    Stone2len = len(Stone2)                       #現在のペアの要素数が大きければ、現在のペアの要素を取得
-                    del Stone2[:]                                 #Stone2配列を初期化
-
-            i += 1
-
-        if Stone2len > 4:                                         #4ペア以上連続する場合は
-            TakeStones = Stone[j-Stone2len:j-Stone2len+4]         #開始添え字から+4の添え字までを格納
-            return TakeStones                             #複数の石取得メソッドを起動
-
-        else:
-            TakeStones = Stone[j-Stone2len:j]                     #連続性チェックで最後にOKだった添え字から、最大ペアの要素数を引いた添え字までを格納
-            return TakeStones
-    
-    else:
-        TakeStones.extend(Stone2)                                 #14～20が1つしかない為、Stone2配列の中身をそのまま格納
-        return TakeStones
+def fncFirst(CheckStoneList,g_lstLiveStone4,g_lstLiveStone3,g_lstLiveStone2):
+	i = 0
+	j = 0
+	flg = 0
+	for taget_pair4 in g_lstLiveStone4:
+		for i in range(4):
+			for taget in CheckStoneList:
+				if taget == taget_pair4[i]:
+					flg += 1
+			if flg == 4:
+				return taget_pair4
+		flg = 0
+	i = 0
+	for taget_pair3 in g_lstLiveStone3:
+		for i in range(3):
+			for taget in CheckStoneList:
+				if taget == taget_pair3[i]:
+					flg += 1
+			if flg == 3:
+				return taget_pair3
+		flg = 0
+	i = 0
+	for taget_pair2 in g_lstLiveStone2:
+		for i in range(2):
+			for taget in CheckStoneList:
+				if taget == taget_pair2[i]:
+					flg += 1
+			if flg == 2:
+				return taget_pair2
+		flg = 0
+	i = 0
+	return CheckStoneList
 
 # ----------------------------------------------------------
 # ここで詰みの部分を作成しますよ！
@@ -405,7 +447,7 @@ def fncCheckEnd():
 
     #2個のとき
     if len(g_lstLiveStone) == 2:
-        return 0
+        return 1
 
     #3個のとき
     elif len(g_lstLiveStone) == 3:

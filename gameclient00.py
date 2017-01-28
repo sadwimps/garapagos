@@ -216,37 +216,37 @@ def fncThinking():
     CheckStoneList = []                #はじめの方で取得していく石のリスト
 
 # 詰みの部分------------------------------------------------
-    # 2個のペアのみになったら詰みの動作を開始(L字もなくなっている想定⇒後で作る)
+    # 2個のペアと1個のみになったら詰みの動作を開始(L字もなくなっている想定⇒後で作る)
     if zanNum3 == 0 and zanNum4 == 0:
         # 詰めない場合「fncCheckEnd()」が0を返した場合はスルー
-        if fncCheckEnd(g_lstLiveStone2) > 0:
-            #2個のペアから1個をとるパターン
-            if fncCheckEnd(g_lstLiveStone2) == 1:
-                TakeStoneList[0] = g_lstLiveStone2[0][0]
-                if len(TakeStoneList) > 0:
-                    return fncGetStoneStr(TakeStoneList)
+        #2個のペアから1個をとるパターン
+        if fncCheckEnd(g_lstLiveStone2) == 1:
+            TakeStoneList[0] = g_lstLiveStone2[0][0]
+            if len(TakeStoneList) > 0:
+                return fncGetStoneStr(TakeStoneList)
 
-            #2個のペアから2個をとるパターン
-            elif fncCheckEnd(g_lstLiveStone2) == 2:
-                TakeStoneList = g_lstLiveStone2[0]
-                if len(TakeStoneList) > 0:
-                    return fncGetStoneStr(TakeStoneList)
+        #2個のペアから2個をとるパターン
+        elif fncCheckEnd(g_lstLiveStone2) == 2:
+            TakeStoneList = g_lstLiveStone2[0]
+            if len(TakeStoneList) > 0:
+                return fncGetStoneStr(TakeStoneList)
 
-            #1個バラの側からとるパターン
-            elif fncCheckEnd(g_lstLiveStone2) == 3:
-                for i in range(zanNum - 1):
-                    for j in range(i + 1, zanNum):
-                        chkList = [0,0]
-                        chkList[0] = g_lstLiveStone[i]
-                        chkList[1] = g_lstLiveStone[j]
-                        if fncCheckStones(chkList) == G_TURE:
-                            break
-                    if j == zanNum:
-                        fncPrintLog(j)
-                        TakeStoneList[0] = chkList[0]
-                        return fncGetStoneStr(TakeStoneList)
-            else:
-                fncPrintLog('「fncCheckEnd」で何か起きてるよ！')
+        #1個バラの側からとるパターン
+        elif fncCheckEnd(g_lstLiveStone2) == 3:
+           for i in range(zanNum - 1):
+                chkpair = 0
+                for j in range(i + 1, zanNum):
+                    chkList = [0,0]
+                    chkList[0] = g_lstLiveStone[i]
+                    chkList[1] = g_lstLiveStone[j]
+                    if fncCheckStones(chkList) == G_TURE:
+                        break
+                    chkpair += 1
+                if chkpair == zanNum:
+                    TakeStoneList[0] = chkList[0]
+                    return fncGetStoneStr(TakeStoneList)
+        else:
+            fncPrintLog('「fncCheckEnd」で何か起きてるよ！')
 
 
 # 序盤から中盤----------------------------------------------
@@ -299,6 +299,7 @@ def fncThinking():
 
 
     # 勝利確定の場合の分岐------------------------------------------
+    # 2個のペアが1つのとき------------------------------------------
     elif zanNum2 == 1:
         if zanNum % 2 == 1:
             TakeStoneList = g_lstLiveStone2[0]
@@ -308,6 +309,8 @@ def fncThinking():
             TakeStoneList[0] = g_lstLiveStone2[0][0]
             if len(TakeStoneList) > 0:
                 return fncGetStoneStr(TakeStoneList)
+
+    # 2個のペアのみのとき--------------------------------------------
     elif zanNum2 * 2 == zanNum:
          if zanNum2 % 2 == 1:
             TakeStoneList = g_lstLiveStone2[0]
@@ -318,12 +321,6 @@ def fncThinking():
             if len(TakeStoneList) > 0:
                 return fncGetStoneStr(TakeStoneList)
 
-    if zanNum2 % 2 == 1:
-        if zanNum % 2 == 1:
-            if zanNum2 == 1:
-                TakeStoneList = g_lstLiveStone2[0]
-                if len(TakeStoneList) > 0:
-                    return fncGetStoneStr(TakeStoneList)
 
     # ここからは取り損ねた時用------------------------------------
     if zanNum4 > 0:
@@ -458,7 +455,7 @@ def fncCheckEnd(g_lstLiveStone2):
 
 # 実際の石の取得--------------------------------------------    
 def fncGetStoneStr(TakeStoneList):
-    TakeStoneString = ''               # 実際に取得するのペアの文字列
+    TakeStoneString = ''               # 実際に取得するペアの文字列
 
     for i in range(len(TakeStoneList)):
         TakeStoneString=TakeStoneString+TakeStoneList[i]

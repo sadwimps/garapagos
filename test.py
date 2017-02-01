@@ -1,4 +1,6 @@
-# --------------------------------------# エンコード宣言# --------------------------------------
+# --------------------------------------
+# エンコード宣言
+# --------------------------------------
 # -*- coding: utf-8 -*-
 # --------------------------------------
 # 定数宣言
@@ -88,8 +90,8 @@ def fncGeneratePair(pairNum,inListLiveStone,inChkListStone):
 # ----------------------------------------------------------
 # 複数の石の連続性をチェックする関数
 #
-# 引数：取る石の番号を格納した文字列リスト
-# 戻値：正常(G_TRUE)もしくはエラー(G_FALSE)
+# 引数：取る石の番号を格納した文字列リスト
+# 戻値：正常(G_TRUE)もしくはエラー(G_FALSE)
 # ----------------------------------------------------------
 def fncCheckStones(a_lstTakeStone):
     i = len(a_lstTakeStone)          # 石の数を取得
@@ -97,8 +99,8 @@ def fncCheckStones(a_lstTakeStone):
     iMax = int(a_lstTakeStone[i - 1]) # 最大値を取得
     iMinDiv = int(iMin / G_COL) # 最小を列数で割った整数部
     iMaxDiv = int(iMax / G_COL) # 最大を列数で割った整数部
-    iMinMod = iMin % G_COL      # 最小を列数で割った余り
-    iMaxMod = iMax % G_COL      # 最大を列数で割った余り
+    iMinMod = iMin % G_COL      # 最小を列数で割った余り
+    iMaxMod = iMax % G_COL      # 最大を列数で割った余り
     # 最大が石数＋最小で、最大と最小を列数で割った結果が同じなら
     if iMax == (iMin + i -1) and iMinDiv == iMaxDiv:
     # 横の連続なので

@@ -92,24 +92,56 @@ def fncGeneratePair(pairNum,inListLiveStone,inChkListStone):
 # 戻値：正常(G_TRUE)もしくはエラー(G_FALSE)
 # ----------------------------------------------------------
 def fncCheckStones(a_lstTakeStone):
-  i = len(a_lstTakeStone)          # 石の数を取得
-  iMin = int(a_lstTakeStone[0])    # 最小値を取得
-  iMax = int(a_lstTakeStone[i - 1]) # 最大値を取得
-  iMinDiv = int(iMin / G_COL) # 最小を列数で割った整数部
-  iMaxDiv = int(iMax / G_COL) # 最大を列数で割った整数部
-  iMinMod = iMin % G_COL      # 最小を列数で割った余り
-  iMaxMod = iMax % G_COL      # 最大を列数で割った余り
-  # 最大が石数＋最小で、最大と最小を列数で割った結果が同じなら
-  if iMax == (iMin + i -1) and iMinDiv == iMaxDiv:
+    i = len(a_lstTakeStone)          # 石の数を取得
+    iMin = int(a_lstTakeStone[0])    # 最小値を取得
+    iMax = int(a_lstTakeStone[i - 1]) # 最大値を取得
+    iMinDiv = int(iMin / G_COL) # 最小を列数で割った整数部
+    iMaxDiv = int(iMax / G_COL) # 最大を列数で割った整数部
+    iMinMod = iMin % G_COL      # 最小を列数で割った余り
+    iMaxMod = iMax % G_COL      # 最大を列数で割った余り
+    # 最大が石数＋最小で、最大と最小を列数で割った結果が同じなら
+    if iMax == (iMin + i -1) and iMinDiv == iMaxDiv:
     # 横の連続なので
-    return G_TURE # 正常を返す
-  # 最大が最小＋石数×列数で、
-  # 最大を列数で割った余りと最小を列数で割った余りが同じなら
-  if iMax == iMin + ((i -1)* G_COL) and iMinMod == iMaxMod:
-    # 他に石がなければ縦の連続なので
-    if i == 2:
-      return G_TURE # 正常を返す
-    # 列数で割った余りがすべて同じでないなら
+        return G_TURE # 正常を返す
+    # 最大が最小＋石数×列数で、
+    # 最大を列数で割った余りと最小を列数で割った余りが同じなら
+    if iMax == iMin + ((i -1)* G_COL) and iMinMod == iMaxMod:
+        # 他に石がなければ縦の連続なので
+        if i == 2:
+            return G_TURE # 正常を返す
+        # 列数で割った余りがすべて同じでないなら
     for j in range(len(a_lstTakeStone)): # 石の数だけループ
-      # 石を列数で割った余りがすべて一致しないなら
-      if (int(a_lstTakeStone[j]) % G_COL) != iMinMod:                return G_FALSE # エラーを返す        # 縦の連続なので        return G_TURE # 正常を返す    # 最大が初期値＋長さ×(列数-1)で、    # 最小を列数で割った余りが最大を列数で割った余りより小さいなら    if iMax == iMin + ((i - 1) * (G_COL - 1)) and iMinMod > iMaxMod:    # 列数-1で割った余りがすべて同じでないなら        for j in range(len(a_lstTakeStone)): # 石の数だけループ            # 石を列数-1で割った余りがすべて一致しないなら            if (int(a_lstTakeStone[j]) % (G_COL - 1)) != iMin % (G_COL - 1):                return -1 # エラーを返す        # 斜め左の連続なので        return G_TURE # 正常を返す    # 最大が初期値＋長さ×(列数+1)で、    # 最小を列数で割った余りが最大を列数で割った余りより大きいなら    if iMax == iMin + ((i - 1) * (G_COL + 1)) and iMinMod < iMaxMod:        # 列数+1で割った余りがすべて同じでないなら        for j in range(len(a_lstTakeStone)): # 石の数だけループ            # 石を列数+1で割った余りがすべて一致しないなら            if (int(a_lstTakeStone[j])) % (G_COL + 1) != iMin % (G_COL + 1):                return -1 # エラーを返す        # 斜め右の連続なので        return G_TURE # 正常を返す    # どのパターンにも当てはまらなければ    return G_FALSE # エラーを返す# --------------------------------------# 実行部ですよ～# --------------------------------------#chk = fncAllForOne(['01','02','03','04','05','06']):chk = fncGeneratePair(2,['01','02','03','04','05','06','07','08','13','14','15','16','17','18'],['01'])print(chk)
+        # 石を列数で割った余りがすべて一致しないなら
+        if (int(a_lstTakeStone[j]) % G_COL) != iMinMod:
+            return G_FALSE # エラーを返す
+        # 縦の連続なので
+        return G_TURE # 正常を返す
+    # 最大が初期値＋長さ×(列数-1)で、
+    # 最小を列数で割った余りが最大を列数で割った余りより小さいなら
+    if iMax == iMin + ((i - 1) * (G_COL - 1)) and iMinMod > iMaxMod:
+        # 列数-1で割った余りがすべて同じでないなら
+        for j in range(len(a_lstTakeStone)):
+            # 石の数だけループ
+            # 石を列数-1で割った余りがすべて一致しないなら
+            if (int(a_lstTakeStone[j]) % (G_COL - 1)) != iMin % (G_COL - 1):
+                return -1 # エラーを返す
+            # 斜め左の連続なので
+            return G_TURE # 正常を返す
+        # 最大が初期値＋長さ×(列数+1)で、
+        # 最小を列数で割った余りが最大を列数で割った余りより大きいなら
+        if iMax == iMin + ((i - 1) * (G_COL + 1)) and iMinMod < iMaxMod:
+            # 列数+1で割った余りがすべて同じでないなら
+            for j in range(len(a_lstTakeStone)): # 石の数だけループ
+                # 石を列数+1で割った余りがすべて一致しないなら
+                if (int(a_lstTakeStone[j])) % (G_COL + 1) != iMin % (G_COL + 1):
+                    return -1 # エラーを返す
+                # 斜め右の連続なので
+                return G_TURE # 正常を返す
+            # どのパターンにも当てはまらなければ
+            return G_FALSE # エラーを返す
+    # --------------------------------------
+    # 実行部ですよ～
+    # --------------------------------------
+    #chk = fncAllForOne(['01','02','03','04','05','06']):
+    chk = fncGeneratePair(2,['01','02','03','04','05','06','07','08','13','14','15','16','17','18'],['01'])
+    print(chk)

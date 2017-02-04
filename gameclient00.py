@@ -1,4 +1,4 @@
-﻿# ----------------------------------------------------------
+# ----------------------------------------------------------
 # 石取りゲーム クライアント（2016年度下期プロコン用）
 # ----------------------------------------------------------
 # 開発環境：Python3.5.2
@@ -37,21 +37,17 @@ G_PCCOM = 2           # PC対通信モード
 # --------------------------------------
 # 定数宣言 開発用※開発終了したら削除(上のコメント化も戻す)
 # --------------------------------------
-G_MAXSTONE = 35       # 石の最大数
-G_ROW = 5            # 石を並べる行数
-G_COL = 7            # 石を並べる列数
+G_MAXSTONE = 6       # 石の最大数
+G_ROW = 2            # 石を並べる行数
+G_COL = 3            # 石を並べる列数
 
 # --------------------------------------
 # モジュールimport
 # --------------------------------------
+import tkinter as tk  # GUIモジュール
 import random  as rd  # 乱数モジュール
 import datetime as dt # 日付モジュール
 import socket as sk   # ソケットモジュール
-import  numpy as np  #1fghgddR
-import cv2
-import Tkinter as tk  # GUIモジュール
-
-
 
 # --------------------------------------
 # メインWindowの準備＆表示
@@ -83,11 +79,6 @@ g_entIpadd = tk.Entry(g_frmStart, textvariable=g_strIpadd, state='normal')      
 g_lblPort = tk.Label(g_frmStart, text=u'接続ポート番号：')                      # 接続ポート番号タイトルの生成
 g_strPort = tk.StringVar()                                                      # 接続ポート番号入力文字格納変数
 g_entPort = tk.Entry(g_frmStart, textvariable=g_strPort, state='normal')        # 接続ポート番号入力エリアの生成
-
-# --------------------------------------
-# gazou
-# --------------------------------------
-img = cv2.imread('/home/pi/Desktop/プログラム/inu.jpg',1)
 
 # --------------------------------------
 # Log表示エリアの準備＆表示
@@ -209,55 +200,84 @@ def fncThinking():
                 if zanNum > 3:
                     g_lstLiveStone4 = fncGeneratePair4(g_lstLiveStone2)
 
-# --関数のエラーチェックはここでやります！------------------
-
-    if fncCheckEnd(g_lstLiveStone2) < 0:
-        fncPrintLog('「fncCheckEnd」で何か起きてるよ！')
-
-    if len(fncFirst(g_lstLiveStone,g_lstLiveStone4,g_lstLiveStone3,g_lstLiveStone2)) == 0:
-        fncPrintLog('「fncFirst」で何か起きてるよ！')
-
 # --ペア作成後に使う定数の初期化はここでやります！------------------
     zanNum2 = len(g_lstLiveStone2)     # 残存石のペア2の数を取得
     zanNum3 = len(g_lstLiveStone3)     # 残存石のペア3の数を取得
     zanNum4 = len(g_lstLiveStone4)     # 残存石のペア4の数を取得
     TakeStoneList = ['00']                # 実際に取得するのペアのリスト
     CheckStoneList = []                #はじめの方で取得していく石のリスト
+    takePatarn=[]
+	
+# --とりあえずエラーチェック------------------
+    fncErrCheck(g_lstLiveStone,g_lstLiveStone4,g_lstLiveStone3,g_lstLiveStone2)
 
+    #残存石が8個以下の詰みの部分だったら
+    
+    # 詰みの部分------------------------------------------------
+    takePatarn = fncFinalCode(zanNum,zanNum3,zanNum4,TakeStoneList,g_lstLiveStone2)
+	
+    # 序盤から中盤----------------------------------------------
+    if len(takePatarn) == 0:
+        takePatarn = fncOpeningPreparation(TakeStoneList,CheckStoneList,g_lstLiveStone2,g_lstLiveStone3,g_lstLiveStone4)
+
+    # 戦況を有利にする部分(2,4,6の列が1つしか取れなくなったらstart)-
+    # 中盤 ---------------------------------------------------------
+    if len(takePatarn) == 0:
+        takePatarn = fncAdvantageous(zanNum,zanNum2,zanNum3,zanNum4,TakeStoneList,g_lstLiveStone2,g_lstLiveStone3,g_lstLiveStone4)
+	
+    # ここからは取り損ねた時用------------------------------------
+    if len(takePatarn) == 0:
+        takePatarn = fncEmergencyBranch(zanNum,zanNum2,zanNum3,zanNum4,TakeStoneList,g_lstLiveStone2,g_lstLiveStone3,g_lstLiveStone4)
+
+    return takePatarn
+
+# --関数のエラーチェックはここでやります！------------------
+def fncErrCheck(g_lstLiveStone,g_lstLiveStone4,g_lstLiveStone3,g_lstLiveStone2):
+    if fncCheckEnd(g_lstLiveStone2) < 0:
+        fncPrintLog('「fncCheckEnd」で何か起きてるよ！')
+
+    if len(fncFirst(g_lstLiveStone,g_lstLiveStone4,g_lstLiveStone3,g_lstLiveStone2)) == 0:
+        fncPrintLog('「fncFirst」で何か起きてるよ！')
+
+
+def fncFinalCode(zanNum,zanNum3,zanNum4,TakeStoneList,g_lstLiveStone2):   
 # 詰みの部分------------------------------------------------
-    # 2個のペアと1個のみになったら詰みの動作を開始(L字もなくなっている想定⇒後で作る)
+    # 2個のペアのみになったら詰みの動作を開始(L字もなくなっている想定⇒後で作る)
     if zanNum3 == 0 and zanNum4 == 0:
         # 詰めない場合「fncCheckEnd()」が0を返した場合はスルー
-        #2個のペアから1個をとるパターン
-        if fncCheckEnd(g_lstLiveStone2) == 1:
-            TakeStoneList[0] = g_lstLiveStone2[0][0]
-            if len(TakeStoneList) > 0:
-                return fncGetStoneStr(TakeStoneList)
-
-        #2個のペアから2個をとるパターン
-        elif fncCheckEnd(g_lstLiveStone2) == 2:
-            TakeStoneList = g_lstLiveStone2[0]
-            if len(TakeStoneList) > 0:
-                return fncGetStoneStr(TakeStoneList)
-
-        #1個バラの側からとるパターン
-        elif fncCheckEnd(g_lstLiveStone2) == 3:
-           for i in range(zanNum - 1):
-                chkpair = 0
-                for j in range(i + 1, zanNum):
-                    chkList = [0,0]
-                    chkList[0] = g_lstLiveStone[i]
-                    chkList[1] = g_lstLiveStone[j]
-                    if fncCheckStones(chkList) == G_TURE:
-                        break
-                    chkpair += 1
-                if chkpair == zanNum:
-                    TakeStoneList[0] = chkList[0]
+        if fncCheckEnd(g_lstLiveStone2) > 0:
+            #2個のペアから1個をとるパターン
+            if fncCheckEnd(g_lstLiveStone2) == 1:
+                TakeStoneList[0] = g_lstLiveStone2[0][0]
+                if len(TakeStoneList) > 0:
                     return fncGetStoneStr(TakeStoneList)
-        else:
-            fncPrintLog('「fncCheckEnd」で何か起きてるよ！')
 
+            #2個のペアから2個をとるパターン
+            elif fncCheckEnd(g_lstLiveStone2) == 2:
+                TakeStoneList = g_lstLiveStone2[0]
+            if len(TakeStoneList) > 0:
+                    return fncGetStoneStr(TakeStoneList)
 
+            #1個バラの側からとるパターン
+            elif fncCheckEnd(g_lstLiveStone2) == 3:
+                for i in range(zanNum - 1):
+                    for j in range(i + 1, zanNum):
+                        chkList = [0,0]
+                        chkList[0] = g_lstLiveStone[i]
+                        chkList[1] = g_lstLiveStone[j]
+                        if fncCheckStones(chkList) == G_TURE:
+                            break
+                    if j == zanNum:
+                        fncPrintLog(j)
+                        TakeStoneList[0] = chkList[0]
+                        return fncGetStoneStr(TakeStoneList)
+            else:
+                fncPrintLog('「fncCheckEnd」で何か起きてるよ！')
+
+    # 対象外の場合は空値で返す
+    return []
+
+def fncOpeningPreparation(TakeStoneList,CheckStoneList,g_lstLiveStone2,g_lstLiveStone3,g_lstLiveStone4):
 # 序盤から中盤----------------------------------------------
     # まずは真ん中からズバット------------------------------
     for i in range(len(g_lstLiveStone)):
@@ -290,7 +310,10 @@ def fncThinking():
             TakeStoneList = fncFirst(CheckStoneList,g_lstLiveStone4,g_lstLiveStone3,g_lstLiveStone2)
             if len(TakeStoneList) > 1:
                 return fncGetStoneStr(TakeStoneList)
+    # 対象外の場合は空値で返す
+    return []
 
+def fncAdvantageous(zanNum,zanNum2,zanNum3,zanNum4,TakeStoneList,g_lstLiveStone2,g_lstLiveStone3,g_lstLiveStone4):
     # 戦況を有利にする部分(2,4,6の列が1つしか取れなくなったらstart)-
     # 中盤 ---------------------------------------------------------
     # 4つのペアを無くす --------------------------------------------
@@ -305,10 +328,7 @@ def fncThinking():
             return fncGetStoneStr(TakeStoneList)
     # L字をはじく---------------------------------------------------
 
-
-
     # 勝利確定の場合の分岐------------------------------------------
-    # 2個のペアが1つのとき------------------------------------------
     elif zanNum2 == 1:
         if zanNum % 2 == 1:
             TakeStoneList = g_lstLiveStone2[0]
@@ -318,8 +338,6 @@ def fncThinking():
             TakeStoneList[0] = g_lstLiveStone2[0][0]
             if len(TakeStoneList) > 0:
                 return fncGetStoneStr(TakeStoneList)
-
-    # 2個のペアのみのとき--------------------------------------------
     elif zanNum2 * 2 == zanNum:
          if zanNum2 % 2 == 1:
             TakeStoneList = g_lstLiveStone2[0]
@@ -330,7 +348,17 @@ def fncThinking():
             if len(TakeStoneList) > 0:
                 return fncGetStoneStr(TakeStoneList)
 
+    if zanNum2 % 2 == 1:
+        if zanNum % 2 == 1:
+            if zanNum2 == 1:
+                TakeStoneList = g_lstLiveStone2[0]
+                if len(TakeStoneList) > 0:
+                    return fncGetStoneStr(TakeStoneList)
 
+    # 対象外の場合は空値で返す
+    return []
+
+def fncEmergencyBranch(zanNum,zanNum2,zanNum3,zanNum4,TakeStoneList,g_lstLiveStone2,g_lstLiveStone3,g_lstLiveStone4):
     # ここからは取り損ねた時用------------------------------------
     if zanNum4 > 0:
         go4 = rd.randint(0,zanNum4-1)       # 残存石のインデックスをランダムに生成
@@ -464,7 +492,7 @@ def fncCheckEnd(g_lstLiveStone2):
 
 # 実際の石の取得--------------------------------------------    
 def fncGetStoneStr(TakeStoneList):
-    TakeStoneString = ''               # 実際に取得するペアの文字列
+    TakeStoneString = ''               # 実際に取得するのペアの文字列
 
     for i in range(len(TakeStoneList)):
         TakeStoneString=TakeStoneString+TakeStoneList[i]
@@ -611,12 +639,15 @@ def fncWin(a_intTF):
     # 引数が真なら手番が勝利、偽なら手番が敗北
     intWinnwr = g_ivTeban.get() + a_intTF
     # ログ出力の手番を設定
+    if g_ivPlay.get() == G_GOTE:
+        if intWinnwr == G_TURE:
+            intWinnwr = G_FALSE
+        else:
+            intWinnwr = G_TURE
     if intWinnwr == G_TURE:                 # 先手が勝者なら
-        strWinner = u'先手の勝利！！'       # 先手を勝者としたログ文字を設定
-        cv2.imshow('window',img)
-        cv2.waitKey(1)
+        strWinner = u'敗北。。。おぬしやるな。。。'       # 先手を勝者としたログ文字を設定
     else:                                   # 後手が勝者なら
-        strWinner = u'後手の勝利！！'       # 後手を勝者としたログ文字を設定
+        strWinner = u'勝利！！'       # 後手を勝者としたログ文字を設定
     fncPrintLog(strWinner)                  # ログに勝者を出力
     g_entInput.configure(state='disabled')  # 指し手入力を使用不可
     g_btnGet.configure(state='disabled')    # Getボタンを使用不可

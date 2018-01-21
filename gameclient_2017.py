@@ -188,91 +188,89 @@ def fncThinking():
 
 def fncTactics():
     g_lstPlace[:] = g_lstPlaceStat
-    sum = 0
-    sumMIN = 9
+    sum = [0]*G_MAXPLACE
     index = 0
     for i in range(len(g_lstPlace)):
         g_lstPlace[i] = g_lstPlace[i] + 1           # 盤全てのステータスに+1をする
     for i in range(len(g_lstPlace)):
         intMod = i % G_COL                          # 取得陣地を列数で割った余り
         intMaxMod = G_COL - 1                       # 余りの最大値
-        sum = 0
         print(g_lstPlace)
 
         # 斜左上
         j = i - G_COL - 1                           # 処理対象を取得
         if j >= 0 and intMod > 0:                   # 処理対象が盤面上なら
             if g_lstPlace[j] == 0:
-                sum = sum + 1
+                sum[i] = sum[i] + 1
                 print('1')
                 print(sum)
-        else: sum = sum + 1
+        else: sum[i] = sum[i] + 1
 
         # 真上を処理
         j = i - G_COL                               # 処理対象を取得
         if j >= 0:                                  # 処理対象が盤面上なら
             if g_lstPlace[j] == 0:
-                sum = sum + 1
+                sum[i] = sum[i] + 1
                 print('2')
                 print(sum)
-        else: sum = sum + 1
+        else: sum[i] = sum[i] + 1
 
         # 斜右上を処理
         j = i - G_COL + 1                           # 処理対象を取得
         if j >= 0 and intMod < intMaxMod:           # 処理対象が盤面上なら
             if g_lstPlace[j] == 0:
-                sum = sum + 1
+                sum[i] = sum[i] + 1
                 print('3')
                 print(sum)
-        else: sum = sum + 1
+        else: sum[i] = sum[i] + 1
 
         # 左横を処理
         j = i - 1                                   # 処理対象を取得
         if j >= 0 and intMod > 0:                   # 処理対象が盤面上なら
             if g_lstPlace[j] == 0:
-                sum = sum + 1
+                sum[i] = sum[i] + 1
                 print('4')
                 print(sum)
-        else: sum = sum + 1
+        else: sum[i] = sum[i] + 1
 
         # 右横を処理
         j = i + 1                                   # 処理対象を取得
         if j < G_MAXPLACE and intMod < intMaxMod:   # 処理対象が盤面上なら
             if g_lstPlace[j] == 0:
-                sum = sum + 1
+                sum[i] = sum[i] + 1
                 print('5')
                 print(sum)
-        else: sum = sum + 1
+        else: sum[i] = sum[i] + 1
 
         # 斜左下を処理
         j = i + G_COL - 1                           # 処理対象を取得
         if j < G_MAXPLACE and intMod > 0:           # 処理対象が盤面上なら
             if g_lstPlace[j] == 0:
-                sum = sum + 1
+                sum[i] = sum[i] + 1
                 print('6')
                 print(sum)
-        else: sum = sum + 1
+        else: sum[i] = sum[i] + 1
 
         # 真下を処理
         j = i + G_COL                               # 処理対象を取得
         if j < G_MAXPLACE:                          # 処理対象が盤面上なら
             if g_lstPlace[j] == 0:
-                sum = sum + 1
+                sum[i] = sum[i] + 1
                 print('7')
                 print(sum)
-        else: sum = sum + 1
+        else: sum[i] = sum[i] + 1
 
         # 斜右下を処理
         j = i + G_COL + 1                           # 処理対象を取得
         if j < G_MAXPLACE and intMod < intMaxMod:   # 処理対象が盤面上なら
             if g_lstPlace[j] == 0:
-                sum = sum + 1
+                sum[i] = sum[i] + 1
                 print('8')
                 print(sum)
-        else: sum = sum + 1
+        else: sum[i] = sum[i] + 1
 
-        if sum == 0 and i < len(g_lstZeroPlace):
-            index = i
+        index = sum.index(min(sum))
+
     return g_lstZeroPlace[index]
 
 # ☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆

@@ -39,6 +39,7 @@ import datetime as dt   # 日付モジュール
 import time as tm       # 時間モジュール
 import socket as sk     # ソケットモジュール
 import threading as th  # スレッドモジュール
+#import scikit-learn as sl #機械学習モジュール
 
 # --------------------------------------
 # メインWindowの準備＆表示
@@ -123,6 +124,7 @@ g_lstPlaceStat = [0]*G_MAXPLACE      # 陣地状態リストをゼロで初期�
 g_lstLivePlace = []                  # 残存陣地リストのみを格納するリストを用意
 g_lstZeroPlace = []                  # 取得可能陣地リストのみを格納するリストを用意
 g_ivWin = tk.IntVar()                # 勝利判定
+g_lstPlace = []                      # 残存陣地から取得可能陣地を引く値を格納(+1 or -1を算出)
 
 # ☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆
 # ☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆
@@ -178,7 +180,100 @@ def fncThinking():
     # ☆☆「取る陣地の番号をカンマ区切で指定した文字列」が戻値
     i = len(g_lstZeroPlace)     # 残存陣地の数を取得
     j = rd.randint(0,i-1)       # 残存陣地のインデックスをランダムに生成
-    return g_lstZeroPlace[j]    # サンプルは残存陣地を１つランダムに返す
+
+#    for i in range(len(g_lstPlace)):
+#        print(g_lstPlace[i])
+    i = fncTactics()
+    return i
+
+def fncTactics():
+    g_lstPlace[:] = g_lstPlaceStat
+    sum = 0
+    sumMIN = 9
+    index = 0
+    for i in range(len(g_lstPlace)):
+        g_lstPlace[i] = g_lstPlace[i] + 1           # 盤全てのステータスに+1をする
+    for i in range(len(g_lstPlace)):
+        intMod = i % G_COL                          # 取得陣地を列数で割った余り
+        intMaxMod = G_COL - 1                       # 余りの最大値
+        sum = 0
+        print(g_lstPlace)
+
+        # 斜左上
+        j = i - G_COL - 1                           # 処理対象を取得
+        if j >= 0 and intMod > 0:                   # 処理対象が盤面上なら
+            if g_lstPlace[j] == 0:
+                sum = sum + 1
+                print('1')
+                print(sum)
+        else: sum = sum + 1
+
+        # 真上を処理
+        j = i - G_COL                               # 処理対象を取得
+        if j >= 0:                                  # 処理対象が盤面上なら
+            if g_lstPlace[j] == 0:
+                sum = sum + 1
+                print('2')
+                print(sum)
+        else: sum = sum + 1
+
+        # 斜右上を処理
+        j = i - G_COL + 1                           # 処理対象を取得
+        if j >= 0 and intMod < intMaxMod:           # 処理対象が盤面上なら
+            if g_lstPlace[j] == 0:
+                sum = sum + 1
+                print('3')
+                print(sum)
+        else: sum = sum + 1
+
+        # 左横を処理
+        j = i - 1                                   # 処理対象を取得
+        if j >= 0 and intMod > 0:                   # 処理対象が盤面上なら
+            if g_lstPlace[j] == 0:
+                sum = sum + 1
+                print('4')
+                print(sum)
+        else: sum = sum + 1
+
+        # 右横を処理
+        j = i + 1                                   # 処理対象を取得
+        if j < G_MAXPLACE and intMod < intMaxMod:   # 処理対象が盤面上なら
+            if g_lstPlace[j] == 0:
+                sum = sum + 1
+                print('5')
+                print(sum)
+        else: sum = sum + 1
+
+        # 斜左下を処理
+        j = i + G_COL - 1                           # 処理対象を取得
+        if j < G_MAXPLACE and intMod > 0:           # 処理対象が盤面上なら
+            if g_lstPlace[j] == 0:
+                sum = sum + 1
+                print('6')
+                print(sum)
+        else: sum = sum + 1
+
+        # 真下を処理
+        j = i + G_COL                               # 処理対象を取得
+        if j < G_MAXPLACE:                          # 処理対象が盤面上なら
+            if g_lstPlace[j] == 0:
+                sum = sum + 1
+                print('7')
+                print(sum)
+        else: sum = sum + 1
+
+        # 斜右下を処理
+        j = i + G_COL + 1                           # 処理対象を取得
+        if j < G_MAXPLACE and intMod < intMaxMod:   # 処理対象が盤面上なら
+            if g_lstPlace[j] == 0:
+                sum = sum + 1
+                print('8')
+                print(sum)
+        else: sum = sum + 1
+
+        if sum == 0 and i < len(g_lstZeroPlace):
+            index = i
+    return g_lstZeroPlace[index]
 
 # ☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆
 # ☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆

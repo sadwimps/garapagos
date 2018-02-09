@@ -39,7 +39,7 @@ import datetime as dt   # 日付モジュール
 import time as tm       # 時間モジュール
 import socket as sk     # ソケットモジュール
 import threading as th  # スレッドモジュール
-#import numpy as np
+# import numpy as np
 
 # --------------------------------------
 # メインWindowの準備＆表示
@@ -125,6 +125,7 @@ g_lstLivePlace = []                  # 残存陣地リストのみを格納す�
 g_lstZeroPlace = []                  # 取得可能陣地リストのみを格納するリストを用意
 g_ivWin = tk.IntVar()                # 勝利判定
 g_lstPlace = []                      # 残存陣地から取得可能陣地を引く値を格納(+1 or -1を算出)
+g_lstZeroPlaceInt = []
 
 # ☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆
 # ☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆
@@ -133,7 +134,7 @@ g_lstPlace = []                      # 残存陣地から取得可能陣地を�
 # 陣地の準備
 # --------------------------------------
 g_lstPlaceLabel = []                 # 陣地表示リストを用意
-for i in range(G_MAXPLACE):          # 陣地の数だけループ 
+for i in range(G_MAXPLACE):          # 陣地の数だけループ
     # 陣地表示リストに陣地ラベルを格納
     g_lstPlaceLabel.append(tk.Label(g_frmMain, text='{0:02d}'.format(i), fg='black', bg='white', width=5, height=2, relief='ridge'))
     # 残存陣地リストにすべての陣地を設定
@@ -188,95 +189,133 @@ def fncThinking():
 
 def fncTactics():
     g_lstPlace[:] = g_lstPlaceStat
-    sum = [0]*G_MAXPLACE
-    index = 0
+    g_lstZeroPlaceInt = list(map(int,g_lstZeroPlace))
+    sum_0 = [0] * len(g_lstZeroPlace)               # 1手先、各盤面の回りに0がいくつできるかをカウント
+    sum_1 = [0] * len(g_lstZeroPlace)               # 1手先、各盤面の回りに1がいくつできるかをカウント
+    index_Min = 0
     for i in range(len(g_lstPlace)):
         g_lstPlace[i] = g_lstPlace[i] + 1           # 盤全てのステータスに+1をする
-    for i in range(len(g_lstPlace)):
+    k = 0
+    for i in g_lstZeroPlaceInt:
         intMod = i % G_COL                          # 取得陣地を列数で割った余り
         intMaxMod = G_COL - 1                       # 余りの最大値
-        print(g_lstPlace)
 
         # 斜左上
         j = i - G_COL - 1                           # 処理対象を取得
         if j >= 0 and intMod > 0:                   # 処理対象が盤面上なら
             if g_lstPlace[j] == 0:
-                sum[i] = sum[i] + 1
-                print('1')
-                print(sum)
-        else: sum[i] = sum[i] + 1
+                sum_0[k] = sum_0[k] + 1
+            elif g_lstPlace[j] == 1:
+                sum_1[k] = sum_1[k] + 1
+        else:
+            sum_0[k] = sum_0[k] + 1
+            sum_1[k] = sum_1[k] + 1
 
         # 真上を処理
         j = i - G_COL                               # 処理対象を取得
         if j >= 0:                                  # 処理対象が盤面上なら
             if g_lstPlace[j] == 0:
-                sum[i] = sum[i] + 1
-                print('2')
-                print(sum)
-        else: sum[i] = sum[i] + 1
+                sum_0[k] = sum_0[k] + 1
+            elif g_lstPlace[j] == 1:
+                sum_1[k] = sum_1[k] + 1
+        else:
+            sum_0[k] = sum_0[k] + 1
+            sum_1[k] = sum_1[k] + 1
 
         # 斜右上を処理
         j = i - G_COL + 1                           # 処理対象を取得
         if j >= 0 and intMod < intMaxMod:           # 処理対象が盤面上なら
             if g_lstPlace[j] == 0:
-                sum[i] = sum[i] + 1
-                print('3')
-                print(sum)
-        else: sum[i] = sum[i] + 1
+                sum_0[k] = sum_0[k] + 1
+            elif g_lstPlace[j] == 1:
+                sum_1[k] = sum_1[k] + 1
+        else:
+            sum_0[k] = sum_0[k] + 1
+            sum_1[k] = sum_1[k] + 1
 
         # 左横を処理
         j = i - 1                                   # 処理対象を取得
         if j >= 0 and intMod > 0:                   # 処理対象が盤面上なら
             if g_lstPlace[j] == 0:
-                sum[i] = sum[i] + 1
-                print('4')
-                print(sum)
-        else: sum[i] = sum[i] + 1
+                sum_0[k] = sum_0[k] + 1
+            elif g_lstPlace[j] == 1:
+                sum_1[k] = sum_1[k] + 1
+        else:
+            sum_0[k] = sum_0[k] + 1
+            sum_1[k] = sum_1[k] + 1
 
         # 右横を処理
         j = i + 1                                   # 処理対象を取得
         if j < G_MAXPLACE and intMod < intMaxMod:   # 処理対象が盤面上なら
             if g_lstPlace[j] == 0:
-                sum[i] = sum[i] + 1
-                print('5')
-                print(sum)
-        else: sum[i] = sum[i] + 1
+                sum_0[k] = sum_0[k] + 1
+            elif g_lstPlace[j] == 1:
+                sum_1[k] = sum_1[k] + 1
+        else:
+            sum_0[k] = sum_0[k] + 1
+            sum_1[k] = sum_1[k] + 1
 
         # 斜左下を処理
         j = i + G_COL - 1                           # 処理対象を取得
         if j < G_MAXPLACE and intMod > 0:           # 処理対象が盤面上なら
             if g_lstPlace[j] == 0:
-                sum[i] = sum[i] + 1
-                print('6')
-                print(sum)
-        else: sum[i] = sum[i] + 1
+                sum_0[k] = sum_0[k] + 1
+            elif g_lstPlace[j] == 1:
+                sum_1[k] = sum_1[k] + 1
+        else:
+            sum_0[k] = sum_0[k] + 1
+            sum_1[k] = sum_1[k] + 1
 
         # 真下を処理
         j = i + G_COL                               # 処理対象を取得
         if j < G_MAXPLACE:                          # 処理対象が盤面上なら
             if g_lstPlace[j] == 0:
-                sum[i] = sum[i] + 1
-                print('7')
-                print(sum)
-        else: sum[i] = sum[i] + 1
+                sum_0[k] = sum_0[k] + 1
+            elif g_lstPlace[j] == 1:
+                sum_1[k] = sum_1[k] + 1
+        else:
+            sum_0[k] = sum_0[k] + 1
+            sum_1[k] = sum_1[k] + 1
 
         # 斜右下を処理
         j = i + G_COL + 1                           # 処理対象を取得
         if j < G_MAXPLACE and intMod < intMaxMod:   # 処理対象が盤面上なら
             if g_lstPlace[j] == 0:
-                sum[i] = sum[i] + 1
-                print('8')
-                print(sum)
-        else: sum[i] = sum[i] + 1
+                sum_0[k] = sum_0[k] + 1
+            elif g_lstPlace[j] == 1:
+                sum_1[k] = sum_1[k] + 1
+        else:
+            sum_0[k] = sum_0[k] + 1
+            sum_1[k] = sum_1[k] + 1
 
-    print(sum)
-    for i in range(len(sum)):
-        index = sum.index(min(sum))
-        if index > len(g_lstZeroPlace):
-           del sum[index]
+        k = k + 1
+
+    for m in range(len(g_lstZeroPlace)):
+        index_Min = sum_0.index(min(sum_0))
+        print("sum_0")
+        print(sum_0)
+        print("-----------------------------------")
+        print("g_lstZeroPlaceInt")
+        print(g_lstZeroPlaceInt)
+        print("-----------------------------------")
 
 
-    return g_lstZeroPlace[index]
+
+
+
+        # print(index_Min)
+        # if index_Min in g_lstZeroPlaceInt:
+        #     index_Min = g_lstZeroPlaceInt.index(index_Min)
+        #     print("true")
+        #     print(index_Min)
+        #     break
+        # else:
+        #     print("false")
+        #     print(index_Min)
+        #     sum_0[index_Min] = sum_0[index_Min] + 99
+
+    # return index_Min
+    return g_lstZeroPlace[index_Min]
 
 # ☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆
 # ☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆

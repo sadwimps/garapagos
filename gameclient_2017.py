@@ -74,10 +74,10 @@ g_strPort = tk.StringVar()                                                      
 g_entPort = tk.Entry(g_frmStart, textvariable=g_strPort, state='normal')        # 接続ポート番号入力エリアの生成
 
 #自動化(MS)
-g_ivMode.set(G_PCCOM)
-g_strTeam.set("002")
-g_strIpadd.set("127.0.0.1")
-g_strPort.set("002")
+#g_ivMode.set(G_PCCOM)
+#g_strTeam.set("002")
+#g_strIpadd.set("127.0.0.1")
+#g_strPort.set("002")
 
 # --------------------------------------
 # Log表示エリアの準備＆表示
@@ -209,36 +209,27 @@ def fncTactics():
     for i in range(len(l_lstPlace)):
         l_lstPlace[i] = l_lstPlace[i] + g_ivTeban.get()   # 盤全てのステータスに+1 or -1をする
 
-    #1つ置いた時の周囲の各数の個数(インデックスが...0:0の数、1:1の数、2:2以上の数、3:-1の数、4:-2以上の数、5:影響を受けない数、6:インデックス、7:重み)
-    l_chkNum_AroundLivePlace[:] = fncChkCondOnAroundLiveList(l_lstPlace,g_lstZeroPlaceInt,lst_Weight)
-
     if g_ivTeban.get() == 1:
-        lst_Weight = [[[12,36,40],[1]]]
+        lst_Weight = [[[8,12,36,40],[2]]]
+
     else:
-        lst_Weight = [[[12],[1]]]
+        lst_Weight = [[[24],[3]],[[22,26],[2]],[[8,10,12,36,38,40],[1]]]
 
     if fncChkAdv() > -4:
         print("有利っぽい！")
-        print(fncChkAdv())
-        print(len(g_lstZeroPlaceInt))
-
-        if fncChkAdv() > 0:
-            l_SortPattern = [[7,1],[3,0],[2,1],[1,1],[0,0]]
-        else:
+        if fncChkAdv() > -1:
             l_SortPattern = [[7,1],[3,0],[2,1],[0,0],[1,1]]
-
-        if len(g_lstZeroPlaceInt) < fncChkAdv() + 3:
-            l_SortPattern = [[7,1],[3,0],[1,1],[2,1],[5,1],[0,0]]
-
+        else:
+            l_SortPattern = [[7,1],[3,0],[5,0],[0,1],[1,1],[2,1]]
     else:
         print("不利っぽい...")
-        print(fncChkAdv())
-        print(len(g_lstZeroPlaceInt))
         l_SortPattern = [[7,1],[2,1],[5,0],[0,1],[1,1]]
-        if len(g_lstZeroPlaceInt) < 20:
-            l_SortPattern = [[7,1],[2,1],[1,1],[4,0],[3,0],[0,1]]
-        if len(g_lstZeroPlaceInt) < 10:
-            l_SortPattern = [[7,1],[2,1],[5,0],[3,0],[0,1],[1,1]]
+        if len(g_lstZeroPlaceInt) < 15:
+            l_SortPattern = [[7,1],[4,0],[3,0],[1,1],[0,1],[5,0]]
+
+
+    #1つ置いた時の周囲の各数の個数(インデックスが...0:0の数、1:1の数、2:2以上の数、3:-1の数、4:-2以上の数、5:影響を受けない数、6:インデックス、7:重み)
+    l_chkNum_AroundLivePlace[:] = fncChkCondOnAroundLiveList(l_lstPlace,g_lstZeroPlaceInt,lst_Weight)
 
 
     #作った2次元配列をソート
@@ -415,10 +406,10 @@ def fncWin(a_intTF):
         if g_ivMode.get() == G_PCCOM:
             if (g_ivPlay.get() < 0 and intWin > 0) or (g_ivPlay.get() > 0 and intWin < 0):
                 strMassage[0] = "負けた…"
-                strMassage[1] = "き、きいてないゼ…　by 平地\n　　　　∧＿∧\n・; .、(・ω(:;(⊂＝⊂≡ \n　　　　(っ　Σ⊂≡⊂＝ \n　　　　/ 　　　) ズバババ\n　　　　( /￣∪"
+                strMassage[1] = ".　　許せん！　by 平地\n　　　　∧＿＿∧ \n　||（＃｀Д´ ）|| \n　||　( |　 　| | 　||| \n　从　| |　 　| | 从从 \n￣) ⊂ノ￣￣!_つ￣て \n　フヘ(　　　　ヽヘ(＼"
             else:
                 strMassage[0] = "勝った！！"
-                strMassage[1] = "  　 　 ∧___∧ \n　 　　(´･ω･ ∩　レベルUP！ by 平地\n　　　o.　　　 ,ﾉ. \n　 　　Ｏ＿ .ﾉ\n　 　 　 　 (ノ\n　 　 　　i｜|\n　　　　 ━━"
+                strMassage[1] = "やっほい！\n　　　　　　　やほほい！ by 平地\n　　　　+　　 　*\n　　　 ∧　　∧　　. ∧∞∧　*\n*　ヽ(=´ω｀)人(´ω｀*)ﾉ\n　.～（ O x.） （ 　 O)～　+\n。*　　　　　∪　　 　∪"
 
         else:
             if (g_ivPlay.get() < 0 and intWin > 0) or (g_ivPlay.get() > 0 and intWin < 0):
